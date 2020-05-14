@@ -14,7 +14,8 @@ defmodule Potcu.Application do
       # Start the Endpoint (http/https)
       PotcuWeb.Endpoint,
 
-      PotcuConsumers.Bot
+      Potcu.Listener,
+      Potcu.Bot
       # Start a worker by calling: Potcu.Worker.start_link(arg)
       # {Potcu.Worker, arg}
     ]
