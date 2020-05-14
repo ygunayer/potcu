@@ -27,5 +27,18 @@ Once you've placed your token, simply run the Phoenix server with the `MIX_ENV` 
 $ MIX_ENV=local mix phx.server
 ```
 
+## Testing
+Simply run
+
+```bash
+$ mix test
+```
+
+By default, mix attempts to start the actual application before running tests, so if you're just running unit tests you might want to skip this step. To do that, pass the `--no-start` option
+
+```bash
+$ mix test --no-start
+```
+
 ## License
 MIT
