@@ -2,3 +2,11 @@
 
 # potcu
 A bot that you can use to bomb voice channels of your choice.
+
+## Prequisites
+- Erlang/OTP 22
+- Elixir 1.10.2
+- Docker
+
+## Running
+

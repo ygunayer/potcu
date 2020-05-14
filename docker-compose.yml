@@ -1,0 +1,18 @@
+version: '2'
+
+services:
+  db:
+    image: postgres:10-alpine
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USERNAME=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=potcu
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql
+
+volumes:
+  db-data:
+    driver: local
