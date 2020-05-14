@@ -7,14 +7,14 @@ defmodule Potcu.Application do
 
   def start(_type, _args) do
     children = [
-      # Start the Ecto repository
-      Potcu.Repo,
       # Start the Telemetry supervisor
       PotcuWeb.Telemetry,
       # Start the PubSub system
       {Phoenix.PubSub, name: Potcu.PubSub},
       # Start the Endpoint (http/https)
-      PotcuWeb.Endpoint
+      PotcuWeb.Endpoint,
+
+      PotcuConsumers.Bot
       # Start a worker by calling: Potcu.Worker.start_link(arg)
       # {Potcu.Worker, arg}
     ]
