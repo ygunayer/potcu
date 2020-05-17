@@ -14,6 +14,8 @@ defmodule Potcu.Utils do
   def interpret_command(["shoo" | _ ]) do {:kick} end
   def interpret_command(["sie" | _ ]) do {:kick} end
 
+  def interpret_command(["gel"]) do {:go_to_sender} end
+
   def interpret_command(["bomb" | [url]]) do {:bomb, url} end
 
   def interpret_command(["bomb" | [channel_id | [url]]]) do
