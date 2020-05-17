@@ -24,8 +24,10 @@ config :nostrum,
 Once you've placed your token, simply run the Phoenix server with the `MIX_ENV` environment variable set to `local`
 
 ```bash
-$ MIX_ENV=local mix phx.server
+$ MIX_ENV=local mix run --no-local
 ```
+
+> *Hint:* Don't forget to pass the `--no-local` option unless you want Elixir to stop your app immediately
 
 ## Testing
 Simply run
