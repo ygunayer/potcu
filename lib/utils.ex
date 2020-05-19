@@ -29,4 +29,9 @@ defmodule Potcu.Utils do
   def interpret_command([]) do {:help} end
 
   def interpret_command(_) do :none end
+
+  def bangify(:ok), do: :ok
+  def bangify({:ok}), do: :ok
+  def bangify({:ok, result}), do: result
+  def bangify({:error, error}), do: raise error
 end

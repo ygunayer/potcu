@@ -1,7 +1,9 @@
 defmodule Potcu.Listener do
   use Nostrum.Consumer
-  alias Nostrum.Api
   require Logger
+
+  alias Potcu.Voice
+  alias Nostrum.Struct.Guild.Voice.Server
 
   def start_link() do
     Consumer.start_link(__MODULE__)
@@ -20,10 +22,14 @@ defmodule Potcu.Listener do
   end
 
   def handle_event({:VOICE_STATE_UPDATE, msg, _ws_state}) do
+    if Nostrum.Cache.Me.get().id == msg.user_id do
+      GenServer.cast(Potcu.Bot, {:update_voice_state, msg})
+    end
     :ignore
   end
 
   def handle_event({:VOICE_SERVER_UPDATE, msg, _ws_state}) do
+    GenServer.cast(Potcu.Bot, {:update_voice_server, msg})
     :ignore
   end
 

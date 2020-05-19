@@ -5,7 +5,7 @@ defmodule Potcu.Application do
     children = [
       Potcu.Bot,
       Potcu.Listener,
-      #Potcu.Voice.Supervisor
+      Potcu.Voice.Supervisor
     ]
 
     opts = [strategy: :one_for_one, name: Potcu.Supervisor]
