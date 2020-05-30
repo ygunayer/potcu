@@ -4,12 +4,12 @@ defmodule UtilsTest do
   describe "Utils.parse_command/1" do
     cases = [
       {[5, <<"x">>, "", "foo", "!potc", "!potcuaaaa"], :none},
-      {["!potcu", "!potcu help"], {:help}},
-      {["!potcu sie", "!potcu shoo"], {:kick}},
+      {["!potcu", "!potcu help"], :help},
+      {["!potcu sie", "!potcu shoo"], :kick},
       {["!potcu bomb x"], {:bomb, "x"}},
       {["!potcu bomb 89918932789497856 y"], {:bomb, Nostrum.Snowflake.cast!(89918932789497856), "y"}},
       {["!potcu bomb x y"], :none},
-      {["!potcu gel"], {:go_to_sender}}
+      {["!potcu gel"], :go_to_sender}
     ]
 
     for {values, expected} <- cases do

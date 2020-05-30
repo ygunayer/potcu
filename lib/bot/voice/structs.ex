@@ -1,4 +1,4 @@
-defmodule Potcu.Voice.Structs do
+defmodule Potcu.Bot.Voice.Structs do
   defmodule Opcodes do
     def opcodes() do
       %{
@@ -105,8 +105,6 @@ defmodule Potcu.Voice.Structs do
     @type token :: String.t()
     @type t :: %__MODULE__{user_id: user_id, guild_id: guild_id, session_id: session_id, endpoint: endpoint, token: token}
 
-    @spec from(any, any, atom | %{endpoint: any, guild_id: any, token: any}) ::
-            Potcu.Voice.Structs.SessionInfo.t()
     def from(user_id, session_id, server) do
       %SessionInfo{
         user_id: user_id,

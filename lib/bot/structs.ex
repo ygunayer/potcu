@@ -3,16 +3,15 @@ defmodule Potcu.Bot.Structs do
   alias Nostrum.Struct.Guild.Voice
 
   defmodule VoiceStatus do
-    defstruct [:status, :handler, :channel_id, :session_id, :server]
+    defstruct [:status, :channel_id, :session_id, :server]
     @type status :: :not_connected | :preparing | :connecting | :connected
     @type channel_id :: Snowflake.t() | nil
     @type session_id :: Snowflake.t() | nil
-    @type handler :: pid() | nil
     @type server :: Voice.Server.t() | nil
 
     @type t :: %__MODULE__{
-      handler: handler,
       session_id: session_id(),
+      channel_id: channel_id(),
       server: server
     }
   end
@@ -26,7 +25,8 @@ defmodule Potcu.Bot.Structs do
   end
 
   defmodule StateData do
-    defstruct [:status, :voice, :bomb]
+    defstruct [:guild_id, :status, :voice, :bomb]
+    @type guild_id :: Snowflake.t()
     @type voice :: VoiceStatus
     @type bomb :: BombStatus
   end

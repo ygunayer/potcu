@@ -3,9 +3,8 @@ defmodule Potcu.Application do
 
   def start(_type, _args) do
     children = [
-      Potcu.Bot,
       Potcu.Listener,
-      Potcu.Voice.Supervisor
+      Potcu.Bot.Registry,
     ]
 
     opts = [strategy: :one_for_one, name: Potcu.Supervisor]

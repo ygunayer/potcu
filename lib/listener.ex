@@ -2,11 +2,15 @@ defmodule Potcu.Listener do
   use Nostrum.Consumer
   require Logger
 
-  alias Potcu.Voice
-  alias Nostrum.Struct.Guild.Voice.Server
-
   def start_link() do
     Consumer.start_link(__MODULE__)
+  end
+
+  def relay(command, msg) do
+    case Potcu.Bot.Registry.get_handler(msg.guild_id) do
+      {:ok, pid} -> GenServer.cast(pid, {command, msg})
+      _ -> Logger.debug("No bot found for #{msg.guild_id}")
+    end
   end
 
   def handle_event({:MESSAGE_CREATE, msg, _ws_state}) do
@@ -15,7 +19,7 @@ defmodule Potcu.Listener do
         :none -> :ignore
         cmd ->
           Logger.info("Received command #{inspect cmd}, relaying to bot")
-          GenServer.cast(Potcu.Bot, {msg, cmd})
+          relay(cmd, msg)
       end
     end
     :ignore
@@ -23,13 +27,18 @@ defmodule Potcu.Listener do
 
   def handle_event({:VOICE_STATE_UPDATE, msg, _ws_state}) do
     if Nostrum.Cache.Me.get().id == msg.user_id do
-      GenServer.cast(Potcu.Bot, {:update_voice_state, msg})
+      relay(:update_voice_state, msg)
     end
     :ignore
   end
 
   def handle_event({:VOICE_SERVER_UPDATE, msg, _ws_state}) do
-    GenServer.cast(Potcu.Bot, {:update_voice_server, msg})
+    relay(:update_voice_server, msg)
+    :ignore
+  end
+
+  def handle_event({:GUILD_AVAILABLE, {guild}, _ws_state}) do
+    Potcu.Bot.Registry.create_handler!(guild.id)
     :ignore
   end
 

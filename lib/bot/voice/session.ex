@@ -1,21 +1,24 @@
-defmodule Potcu.Voice.Session do
+defmodule Potcu.Bot.Voice.Session do
   use GenServer
   require Logger
 
-  alias Potcu.Voice.Structs.{WSState, StateData, Payload, DiscordHeartbeat, DiscordVoiceInfo}
+  alias Potcu.Bot.Voice.Structs.{WSState, StateData, Payload, DiscordHeartbeat, DiscordVoiceInfo}
 
   @timeout_connect 10_000
   @timeout_upgrade 10_000
 
-  def child_spec(session) do
+  ##################
+  ## Initialization
+  ##################
+  def child_spec(session, opts) do
     %{
-      id: <<"voice-session-#{session.guild_id}">>,
-      start: {__MODULE__, :start_link, [session]}
+      id: "bot-voice-session-#{session.guild_id}",
+      start: {__MODULE__, :start_link, [session, opts]}
     }
   end
 
-  def start_link(session) do
-    GenServer.start_link(__MODULE__, session)
+  def start_link(session, opts) do
+    GenServer.start_link(__MODULE__, session, opts)
   end
 
   def init(session) do
@@ -28,6 +31,14 @@ defmodule Potcu.Voice.Session do
     }
     {:ok, {:connecting, state_data}, {:continue, :connect}}
   end
+
+  def handle_continue(:connect, state) do
+    reconnect(state)
+  end
+
+  ##################
+  ## Private API
+  ##################
 
   defp reconnect({_, data}) do
     %{token: token, endpoint: endpoint, guild_id: guild_id, session_id: session_id, user_id: user_id} = data.session
@@ -70,14 +81,18 @@ defmodule Potcu.Voice.Session do
     end
   end
 
-  def handle_continue(:connect, state) do
-    reconnect(state)
-  end
+  ##################
+  ## Callbacks
+  ##################
+
+  ## Cast
+  ##########
 
   def handle_cast({:ws_payload, %{"op" => :ready, "d" => payload}}, {:identifying, state_data}) do
     case DiscordVoiceInfo.from(payload) do
       {:ok, voice_info} ->
         Logger.debug("Connected to voice server")
+        Potcu.Bot.Registry.cast(:handler, state_data.session.guild_id, {:voice_connected, self()})
         # TODO: establish UDP connection
         new_state_data = %StateData{state_data | voice: voice_info}
         {:noreply, {:connected, new_state_data}}
@@ -98,6 +113,11 @@ defmodule Potcu.Voice.Session do
     {:noreply, state}
   end
 
+  def handle_cast({:ws_payload, %{"op" => :client_disconnect}}, _) do
+    Logger.debug("Disconnected from voice server")
+    exit(:client_disconnect)
+  end
+
   def handle_cast({:ws_payload, payload}, state) do
     Logger.debug("Unrecognized WS payload #{inspect payload}")
     {:noreply, state}
@@ -106,6 +126,9 @@ defmodule Potcu.Voice.Session do
   def handle_cast(_msg, state) do
     {:noreply, state}
   end
+
+  ## Call
+  ##########
 
   def handle_call(:identify, sender, state) do
     identity = state.session.guild_id
@@ -116,6 +139,9 @@ defmodule Potcu.Voice.Session do
   def handle_call(_msg, _sender, state) do
     {:reply, :ignore, state}
   end
+
+  ## Info
+  ##########
 
   def handle_info({:disconnect}, state) do
     Logger.debug("Shutting down voice session")
@@ -141,11 +167,9 @@ defmodule Potcu.Voice.Session do
     end
   end
 
-  def handle_info({:gun_ws, _conn, _stream, {:close, errno, reason}}, state) do
-    Logger.warn("Disconnected from voice server due to #{inspect reason} (errno #{errno}), attempting to reconnect...")
-    disconnect(state)
-    Process.sleep(500)
-    reconnect(state)
+  def handle_info({:gun_ws, _conn, _stream, {:close, errno, reason}}, _) do
+    Logger.warn("Disconnected from voice server due to #{inspect reason} (errno #{errno})")
+    exit(reason)
   end
 
   def handle_info({:gun_ws, _worker, _stream, frame}, state) do
